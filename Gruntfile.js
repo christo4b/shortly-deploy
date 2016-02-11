@@ -11,7 +11,7 @@ module.exports = function(grunt) {
         dest: 'public/dist/built.js'
       },
       lib: {
-        src: ['public/lib/*.js'],
+        src: ['public/lib/jquery.js', 'public/lib/underscore.js', 'public/lib/backbone.js', 'public/lib/handlebars.js'],
         dest: 'public/dist/lib.js'
       }
     },
@@ -34,8 +34,8 @@ module.exports = function(grunt) {
     uglify: {
       my_target: {
         files: {
-          'dist/built.min.js': ['dist/built.js'],
-          'dist/lib.min.js': ['dist/lib.js']
+          'public/dist/built.min.js': ['public/dist/built.js'],
+          'public/dist/lib.min.js': ['public/dist/lib.js']
         }
       }
     },
@@ -54,7 +54,7 @@ module.exports = function(grunt) {
           expand: true,
           cwd: 'public',
           src: ['*.css', '!*.min.css'],
-          dest: 'public',
+          dest: 'public/dist',
           ext: '.min.css'
         }]
       }
@@ -72,7 +72,7 @@ module.exports = function(grunt) {
         ]
       },
       css: { 
-        files: 'public/*.css',
+        files: 'public/dist/*.css',
         tasks: ['cssmin']
       }
     },
@@ -119,14 +119,13 @@ module.exports = function(grunt) {
   ////////////////////////////////////////////////////
 
   grunt.registerTask('test', [
-    'eslint',
     'mochaTest'
   ]);
 
   grunt.registerTask('build', [
     'concat',
+    'uglify',
     'cssmin',
-    'uglify'
   ]);
 
   grunt.registerTask('upload', function(n) {
@@ -139,8 +138,7 @@ module.exports = function(grunt) {
 
   grunt.registerTask('deploy', [
     'build',
-    'test',
-    'watch'
+    'test'
   ]);
 
 
