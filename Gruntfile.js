@@ -42,9 +42,9 @@ module.exports = function(grunt) {
 
     eslint: {
       target: [
-        // Add list of files to lint here
-        // TODO
-        // WHERE DO WE ADD LOGIC?
+        'server.js',
+        'server-config.js',
+        'app/**/*.js'
       ]
     },
 
@@ -119,6 +119,7 @@ module.exports = function(grunt) {
   ////////////////////////////////////////////////////
 
   grunt.registerTask('test', [
+    'eslint',
     'mochaTest'
   ]);
 
