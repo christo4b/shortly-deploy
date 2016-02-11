@@ -10,10 +10,6 @@ module.exports = function(grunt) {
         src: ['public/client/**/*.js'],
         dest: 'public/dist/built.js'
       },
-      styles: {
-        src: ['public/*.css'],
-        dest: 'public/dist/built.css'
-      },
       lib: {
         src: ['public/lib/*.js'],
         dest: 'public/dist/lib.js'
@@ -38,7 +34,8 @@ module.exports = function(grunt) {
     uglify: {
       my_target: {
         files: {
-          'dist/built.min.js': ['dist/built.js'];
+          'dist/built.min.js': ['dist/built.js'],
+          'dist/lib.min.js': ['dist/lib.js']
         }
       }
     },
@@ -51,10 +48,19 @@ module.exports = function(grunt) {
       ]
     },
 
-    cssmin: {
+    cssmin: { // does this create multiple minified files if we pass it an array of files?
+      target: {
+        files: [{
+          expand: true,
+          cwd: 'public',
+          src: ['*.css', '!*.min.css'],
+          dest: 'public',
+          ext: '.min.css'
+        }]
+      }
     },
 
-    watch: {
+    watch: { // runs pre-defined tasks whenever file patterns are added, changed, or deleted
       scripts: {
         files: [
           'public/client/**/*.js',
@@ -65,7 +71,7 @@ module.exports = function(grunt) {
           'uglify'
         ]
       },
-      css: {
+      css: { 
         files: 'public/*.css',
         tasks: ['cssmin']
       }
@@ -85,6 +91,7 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-mocha-test');
   grunt.loadNpmTasks('grunt-shell');
   grunt.loadNpmTasks('grunt-nodemon');
+  
 
   grunt.registerTask('server-dev', function (target) {
     // Running nodejs in a different process and displaying output on the main console
@@ -112,10 +119,14 @@ module.exports = function(grunt) {
   ////////////////////////////////////////////////////
 
   grunt.registerTask('test', [
+    'eslint',
     'mochaTest'
   ]);
 
   grunt.registerTask('build', [
+    'concat',
+    'cssmin',
+    'uglify'
   ]);
 
   grunt.registerTask('upload', function(n) {
@@ -127,9 +138,7 @@ module.exports = function(grunt) {
   });
 
   grunt.registerTask('deploy', [
-    'concat',
-    'uglify',
-    'eslint',
+    'build',
     'test',
     'watch'
   ]);
