@@ -2,24 +2,44 @@ var db = require('../config');
 var bcrypt = require('bcrypt-nodejs');
 var Promise = require('bluebird');
 
-var User = db.Model.extend({
-  tableName: 'users',
-  hasTimestamps: true,
-  initialize: function() {
-    this.on('creating', this.hashPassword);
+var userSchema = new db.Schema( {
+  username: {
+    type: String,
+    unique: true
   },
-  comparePassword: function(attemptedPassword, callback) {
-    bcrypt.compare(attemptedPassword, this.get('password'), function(err, isMatch) {
+  password: String
+} );
+
+var User = db.model( 'User', userSchema );
+
+User.getHashedPassword = function( userID, callback ) {
+  User.findById( userId, function( err, user ) {
+    if( err ) throw err;
+    else callback( user.password );
+  } );
+};
+
+User.comparePassword = function( userID, attemptedPassword, callback ) {
+  User.getHashedPassword( userID, function( password ) {
+    bcrypt.compare(attemptedPassword, password, function(err, isMatch) {
       callback(isMatch);
-    });
-  },
-  hashPassword: function() {
+    } );
+  } );
+};
+
+User.hashPassword = function( userID, callback ) {
+  User.findById( userID, function( err, user ) {
+    if( err ) throw err;
     var cipher = Promise.promisify(bcrypt.hash);
-    return cipher(this.get('password'), null, null).bind(this)
-      .then(function(hash) {
-        this.set('password', hash);
+    return cipher( user.password, null, null )
+      .then( function( hash ) {
+        user.password = hash;
+        user.save( function( err ) {
+          if( err ) throw err;
+          else callback();
+        } );
       });
-  }
-});
+  } );
+};
 
 module.exports = User;
